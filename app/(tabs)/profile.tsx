@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -9,26 +9,26 @@ import {
   Alert,
 } from "react-native";
 
-type Profile = {
-  name: string;
-  gender: string;
-  age: string;
-  occupation: string;
-  experience: string;
-  bio: string;
+import { Profile, useCommunity } from "@/components/community-context";
+
+const emptyProfile: Profile = {
+  name: "",
+  gender: "",
+  age: "",
+  occupation: "",
+  experience: "",
+  bio: "",
 };
 
 export default function ProfileScreen() {
-  const [profile, setProfile] = useState<Profile | null>(null);
+  const { profile, updateProfile } = useCommunity();
+  const [form, setForm] = useState<Profile>(profile ?? emptyProfile);
 
-  const [form, setForm] = useState<Profile>({
-    name: "",
-    gender: "",
-    age: "",
-    occupation: "",
-    experience: "",
-    bio: "",
-  });
+  useEffect(() => {
+    if (profile) {
+      setForm(profile);
+    }
+  }, [profile]);
 
   const handleChange = (field: keyof Profile, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -40,7 +40,7 @@ export default function ProfileScreen() {
       return;
     }
 
-    setProfile(form);
+    updateProfile(form);
     Alert.alert("Profile saved", "Your profile has been updated locally.");
   };
 
