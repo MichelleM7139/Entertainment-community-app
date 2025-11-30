@@ -1,98 +1,242 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  ScrollView,
+  StyleSheet,
+  Switch,
+  Button,
+  Alert,
+} from "react-native";
 
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+type Post = {
+  id: string;
+  title: string;
+  role: string;
+  rehearsalTime: string;
+  shootTime: string;
+  compensation: string;
+  foodProvided: boolean;
+  address: string;
+  description: string;
+  createdAt: string;
+};
 
-export default function HomeScreen() {
+export default function RecruitmentScreen() {
+  const [form, setForm] = useState({
+    title: "",
+    role: "",
+    rehearsalTime: "",
+    shootTime: "",
+    compensation: "",
+    foodProvided: false,
+    address: "",
+    description: "",
+  });
+
+  const [posts, setPosts] = useState<Post[]>([]);
+
+  const handleChange = (field: keyof typeof form, value: string | boolean) => {
+    setForm((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleCreatePost = () => {
+    if (!form.title || !form.role || !form.shootTime) {
+      Alert.alert(
+        "Missing info",
+        "Please fill at least title, role, and shoot time."
+      );
+      return;
+    }
+
+    const newPost: Post = {
+      id: Date.now().toString(),
+      ...form,
+      createdAt: new Date().toISOString(),
+    };
+
+    setPosts((prev) => [newPost, ...prev]);
+
+    // reset form
+    setForm({
+      title: "",
+      role: "",
+      rehearsalTime: "",
+      shootTime: "",
+      compensation: "",
+      foodProvided: false,
+      address: "",
+      description: "",
+    });
+
+    Alert.alert(
+      "Post created",
+      "Your opportunity has been posted locally on this device."
+    );
+
+    // 💬 Later: here is where we will also create a group chat for this project.
+  };
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+    <ScrollView contentContainerStyle={styles.container}>
+      <Text style={styles.title}>Create Recruitment Post</Text>
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+      <Text style={styles.label}>Project Title</Text>
+      <TextInput
+        style={styles.input}
+        value={form.title}
+        onChangeText={(text) => handleChange("title", text)}
+        placeholder="e.g. Music Video - Street Style"
+      />
+
+      <Text style={styles.label}>Role</Text>
+      <TextInput
+        style={styles.input}
+        value={form.role}
+        onChangeText={(text) => handleChange("role", text)}
+        placeholder="e.g. Background dancer / Videographer / Actor"
+      />
+
+      <Text style={styles.label}>Rehearsal Time</Text>
+      <TextInput
+        style={styles.input}
+        value={form.rehearsalTime}
+        onChangeText={(text) => handleChange("rehearsalTime", text)}
+        placeholder="e.g. Dec 12, 7–10pm"
+      />
+
+      <Text style={styles.label}>Shoot Time</Text>
+      <TextInput
+        style={styles.input}
+        value={form.shootTime}
+        onChangeText={(text) => handleChange("shootTime", text)}
+        placeholder="e.g. Dec 15, 2–8pm"
+      />
+
+      <Text style={styles.label}>Compensation</Text>
+      <TextInput
+        style={styles.input}
+        value={form.compensation}
+        onChangeText={(text) => handleChange("compensation", text)}
+        placeholder="e.g. $150/day + credits"
+      />
+
+      <View style={styles.switchRow}>
+        <Text style={styles.label}>Food / Drink Provided</Text>
+        <Switch
+          value={form.foodProvided}
+          onValueChange={(value) => handleChange("foodProvided", value)}
+        />
+      </View>
+
+      <Text style={styles.label}>Address</Text>
+      <TextInput
+        style={styles.input}
+        value={form.address}
+        onChangeText={(text) => handleChange("address", text)}
+        placeholder="e.g. 123 Queen St W, Toronto"
+      />
+
+      <Text style={styles.label}>Description / Notes</Text>
+      <TextInput
+        style={[styles.input, styles.multiline]}
+        value={form.description}
+        onChangeText={(text) => handleChange("description", text)}
+        placeholder="Any extra info (wardrobe, vibe, requirements...)"
+        multiline
+      />
+
+      <View style={styles.buttonWrapper}>
+        <Button title="Post Opportunity" onPress={handleCreatePost} />
+      </View>
+
+      <Text style={[styles.title, { marginTop: 24 }]}>Your Local Posts</Text>
+      {posts.length === 0 && (
+        <Text style={{ color: "#666", marginTop: 4 }}>
+          No posts yet. Create your first recruitment above.
+        </Text>
+      )}
+
+      {posts.map((post) => (
+        <View key={post.id} style={styles.card}>
+          <Text style={styles.cardTitle}>{post.title}</Text>
+          <Text style={styles.cardSubtitle}>Role: {post.role}</Text>
+          <Text style={styles.cardText}>Rehearsal: {post.rehearsalTime}</Text>
+          <Text style={styles.cardText}>Shoot: {post.shootTime}</Text>
+          <Text style={styles.cardText}>
+            Compensation: {post.compensation || "Not specified"}
+          </Text>
+          <Text style={styles.cardText}>
+            Food/Drink: {post.foodProvided ? "Provided" : "Not specified"}
+          </Text>
+          <Text style={styles.cardText}>Address: {post.address}</Text>
+          {post.description ? (
+            <Text style={styles.cardText}>Notes: {post.description}</Text>
+          ) : null}
+        </View>
+      ))}
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  container: {
+    padding: 16,
+    paddingBottom: 40,
+    backgroundColor: "#f7f7f7",
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  title: {
+    fontSize: 22,
+    fontWeight: "700",
+    marginBottom: 12,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  label: {
+    fontSize: 14,
+    fontWeight: "600",
+    marginTop: 10,
+    marginBottom: 4,
+  },
+  input: {
+    backgroundColor: "white",
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+  },
+  multiline: {
+    minHeight: 70,
+    textAlignVertical: "top",
+  },
+  buttonWrapper: {
+    marginTop: 16,
+  },
+  switchRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginTop: 10,
+  },
+  card: {
+    marginTop: 12,
+    padding: 12,
+    backgroundColor: "white",
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#ddd",
+  },
+  cardTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+  },
+  cardSubtitle: {
+    fontSize: 13,
+    color: "#555",
+    marginTop: 2,
+  },
+  cardText: {
+    fontSize: 13,
+    marginTop: 4,
   },
 });
